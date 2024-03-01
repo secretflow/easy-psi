@@ -1,0 +1,512 @@
+// Copyright 2023 Ant Group Co., Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package secretflow.kuscia;
+
+option java_package = "org.secretflow.proto.kuscia";
+import "secretflow/protos/kuscia/psi_config.proto";
+
+// Role of parties.
+enum Role {
+  ROLE_UNSPECIFIED = 0;
+
+  // receiver
+  // In 2P symmetric PSI, receiver would always receive the result.
+  ROLE_RECEIVER = 1;
+
+  // sender
+  // In 2P symmetric PSI, sender is the other participant apart from receiver.
+  ROLE_SENDER = 2;
+}
+
+// PSI protocols.
+enum Protocol {
+  PROTOCOL_UNSPECIFIED = 0;
+
+  // Semi-Honest Secure
+
+  // [Mea86]C. Meadows, "A More Efficient Cryptographic Matchmaking Protocol
+  // for Use in the Absence of a Continuously Available Third Party," 1986 IEEE
+  // Symposium on Security and Privacy, Oakland, CA, USA, 1986, pp. 134-134,
+  // doi: 10.1109/SP.1986.10022.
+  PROTOCOL_ECDH = 1;
+
+  // Efficient Batched Oblivious PRF with Applications to Private Set
+  // Intersection https://eprint.iacr.org/2016/799.pdf
+  PROTOCOL_KKRT = 2;
+
+  // PSI from Pseudorandom Correlation Generators
+  // https://eprint.iacr.org/2022/334
+  PROTOCOL_RR22 = 3;
+}
+
+//// The specified elliptic curve cryptography used in psi.
+//enum CurveType {
+//  CURVE_INVALID_TYPE = 0;
+//
+//  // Daniel J. Bernstein. Curve25519: new diffie-hellman speed records
+//  CURVE_25519 = 1;
+//  // FourQ: four-dimensional decompositions on a Q-curve over the Mersenne prime
+//  CURVE_FOURQ = 2;
+//  // SM2 is an elliptic curve based cryptosystem (ECC)
+//  // published as a Chinese National Standard as GBT.32918.1-2016
+//  // and published in ISO/IEC 14888-3:2018
+//  CURVE_SM2 = 3;
+//  // parameters of the elliptic curve defined in Standards for Efficient
+//  // Cryptography (SEC) http://www.secg.org/sec2-v2.pdf
+//  CURVE_SECP256K1 = 4;
+//
+//  // TODO: @changjun.zl support ristretto255
+//  // Ristretto255 implements abstract prime-order group interface of Curve25519
+//  CURVE_25519_ELLIGATOR2 = 5;
+//}
+
+// Configs for ECDH protocol.
+message EcdhConfig {
+  secretflow.kuscia.CurveType curve = 1;
+}
+
+// Configs for KKRT protocol
+message KkrtConfig {
+  // Since the total input may not fit in memory, the input may be splitted into
+  // buckets. bucket_size indicate the number of items in each bucket.
+  //
+  // If the memory of host is limited, you should set a smaller bucket size.
+  // Otherwise, you should use a larger one.
+  //
+  // If not set, use default value: 1 << 20.
+  uint64 bucket_size = 1;
+}
+
+// Configs for RR22 protocol.
+message Rr22Config {
+  // Since the total input may not fit in memory, the input may be splitted into
+  // buckets. bucket_size indicate the number of items in each bucket.
+  // If the memory of host is limited, you should set a smaller bucket size.
+  // Otherwise, you should use a larger one.
+  // If not set, use default value: 1 << 20.
+  uint64 bucket_size = 1;
+
+  bool low_comm_mode = 2;
+}
+
+// Any items related to PSI protocols.
+message ProtocolConfig {
+  Protocol protocol = 1;
+
+  Role role = 2;
+
+  // Reveal result to sender.
+  bool broadcast_result = 3;
+
+  // For ECDH protocol.
+  EcdhConfig ecdh_config = 4;
+
+  // For KKRT protocol.
+  KkrtConfig kkrt_config = 5;
+
+  // For RR22 protocol.
+  Rr22Config rr22_config = 6;
+}
+
+// Stores input or output data.
+// For IoType::IO_TYPE_MEM_RAW.
+message Table {
+  message Row {
+    repeated string values = 1;
+  }
+
+  Row header = 1;
+  repeated Row data = 2;
+}
+
+enum IoType {
+  IO_TYPE_UNSPECIFIED = 0;
+
+  // Local csv file.
+  IO_TYPE_FILE_CSV = 1;
+
+  // With Table pb msg.
+  IO_TYPE_MEM_RAW = 2;
+}
+
+// Input configuration.
+message InputConfig {
+  IoType type = 1;
+
+  // Required for FILE.
+  string path = 2;
+  // Required for RAW.
+  Table raw = 3;
+}
+
+// Output configuration.
+message OutputConfig {
+  // If true, type of output would be the same as input type. And type would be
+  // ngelected.
+  bool input_type_followed = 1;
+
+  IoType type = 2;
+
+  // Required for FILE.
+  string path = 3;
+}
+
+// Configuration for recovery.
+// If a PSI task failed unexpectedly, e.g. network failures and restart, the
+// task can resume to the latest checkpoint to save time.
+// However, enabling recovery would due in extra disk IOs and disk space
+// occupation.
+message RecoveryConfig {
+  bool enabled = 1;
+
+  // Stores status and checkpoint files.
+  string folder = 2;
+}
+
+message DebugOptions {
+  // Logging level for default logger.
+  // Default to info.
+  // Supports:
+  // trace - SPDLOG_LEVEL_TRACE,
+  // debug - SPDLOG_LEVEL_DEBUG,
+  // info - SPDLOG_LEVEL_INFO,
+  // warn - SPDLOG_LEVEL_WARN,
+  // err - SPDLOG_LEVEL_ERROR,
+  // critical - SPDLOG_LEVEL_CRITICAL,
+  // off - SPDLOG_LEVEL_OFF,
+  string logging_level = 1;
+
+  // The path of trace.
+  // Deafult to /tmp/psi.trace
+  string trace_path = 2;
+}
+
+// The top level of Configs.
+// run(PsiConfig)->PsiReport
+message PsiConfig {
+  // Configs for protocols.
+  ProtocolConfig protocol_config = 1;
+
+  // Configs for input.
+  InputConfig input_config = 2;
+
+  // Configs for output.
+  OutputConfig output_config = 3;
+
+  // Configs for network.
+//  ContextDescProto link_config = 4;
+
+  // keys for intersection.
+  repeated string keys = 6;
+
+  // Logging level.
+  DebugOptions debug_options = 7;
+
+  // If true, the check of duplicated items will be skiped.
+  bool skip_duplicates_check = 8;
+
+  reserved 9;
+
+  // It true, output is not promised to be aligned.
+  bool disable_alignment = 10;
+
+  // Configs for recovery.
+  RecoveryConfig recovery_config = 11;
+
+  // Advanced modes which allow duplicate keys.
+  enum AdvancedJoinType {
+    ADVANCED_JOIN_TYPE_UNSPECIFIED = 0;
+
+    ADVANCED_JOIN_TYPE_INNER_JOIN = 1;
+
+    ADVANCED_JOIN_TYPE_LEFT_JOIN = 2;
+
+    ADVANCED_JOIN_TYPE_RIGHT_JOIN = 3;
+
+    ADVANCED_JOIN_TYPE_FULL_JOIN = 4;
+
+    ADVANCED_JOIN_TYPE_DIFFERENCE = 5;
+  }
+
+  AdvancedJoinType advanced_join_type = 12;
+
+  // Required if advanced_join_type is ADVANCED_JOIN_TYPE_INNER_JOIN.
+  Role left_side = 13;
+
+  // Check if hash digest of keys from parties are equal to determine whether to
+  // early-stop.
+  bool check_hash_digest = 14;
+}
+
+// Execution Report.
+message PsiReport {
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+
+    STATUS_FAILURE = 1;
+
+    STATUS_SUCCESS = 2;
+  }
+
+  Status status = 1;
+
+  // Detailed error msg if failed.
+  string error_msg = 2;
+
+  // Maybe used if output type is RAW.
+  Table output = 3;
+
+  // The data count of input.
+  int64 original_count = 4;
+
+  // The count of intersection. Get `-1` when self party can not get result.
+  int64 intersection_count = 5;
+}
+
+// Save some critical information for future recovery.
+message RecoveryCheckpoint {
+  enum Stage {
+    STAGE_UNSPECIFIED = 0;
+
+    STAGE_INIT_END = 1;
+
+    STAGE_PRE_PROCESS_END = 2;
+
+    STAGE_ONLINE_START = 3;
+
+    STAGE_ONLINE_END = 4;
+
+    STAGE_POST_PROCESS_END = 5;
+  }
+
+  // Stage of PSI.
+  Stage stage = 1;
+
+  // A copy of origin PSI config.
+  PsiConfig config = 2;
+
+  // Hash digest of input keys.
+  string input_hash_digest = 3;
+
+  // Saved dual masked item count from self originally.
+  // PROTOCOL_ECDH only.
+  uint64 ecdh_dual_masked_item_self_count = 4;
+
+  // Saved dual masked item count from peer originally.
+  // PROTOCOL_ECDH only.
+  uint64 ecdh_dual_masked_item_peer_count = 5;
+}
+
+message InternalRecoveryRecord {
+  RecoveryCheckpoint.Stage stage = 1;
+
+  uint64 ecdh_dual_masked_item_peer_count = 2;
+}
+
+message PsiConfigMap {
+  map<string, PsiConfig> sf_psi_config_map = 1;
+}
+
+message PartyProto {
+  string id = 1;
+
+  string host = 2;
+}
+
+// SSL options.
+message SSLOptionsProto {
+  // Certificate file path
+  string certificate_path = 1;
+
+  // Private key file path
+  string private_key_path = 2;
+
+  // Set the maximum depth of the certificate chain for verification
+  // If 0, turn off the verification
+  int32 verify_depth = 3;
+  // Set the trusted CA file to verify the peer's certificate
+  // If empty, use the system default CA files
+  string ca_file_path = 4;
+}
+
+// Retry options.
+message RetryOptionsProto {
+  // max retry count
+  // default 3
+  uint32 max_retry = 1;
+  // time between retries at first retry
+  // default 1 second
+  uint32 retry_interval_ms = 2;
+  // The amount of time to increase the interval between retries
+  // default 2s
+  uint32 retry_interval_incr_ms = 3;
+  // The maximum interval between retries
+  // default 10s
+  uint32 max_retry_interval_ms = 4;
+  // retry on these brpc error codes, if empty, retry on all codes
+  repeated uint32 error_codes = 5;
+  // retry on these http codes, if empty, retry on all http codes
+  repeated uint32 http_codes = 6;
+  // do aggressive retry， this means that retries will be made on additional
+  // error codes
+  bool aggressive_retry = 7;
+}
+
+// Configuration for link config.
+message ContextDescProto {
+  // the UUID of this communication.
+  // optional
+  string id = 1;
+
+  // party description, describes the world.
+  repeated PartyProto parties = 2;
+
+  // connect to mesh retry time.
+  uint32 connect_retry_times = 3;
+
+  // connect to mesh retry interval.
+  uint32 connect_retry_interval_ms = 4;
+
+  // recv timeout in milliseconds.
+  //
+  // 'recv time' is the max time that a party will wait for a given event.
+  // for example:
+  //
+  //      begin recv                 end recv
+  // |--------|-------recv-time----------|------------------| alice's timeline
+  //
+  //                         begin send     end send
+  // |-----busy-work-------------|-------------|------------| bob's timeline
+  //
+  // in above case, when alice begins recv for a specific event, bob is still
+  // busy doing its job, when alice's wait time exceed wait_timeout_ms, it raise
+  // exception, although bob now is starting to send data.
+  //
+  // so for long time work(that one party may wait for the others for very long
+  // time), this value should be changed accordingly.
+  uint64 recv_timeout_ms = 5;
+
+  // http max payload size, if a single http request size is greater than this
+  // limit, it will be unpacked into small chunks then reassembled.
+  //
+  // This field does affect performance. Please choose wisely.
+  uint32 http_max_payload_size = 6;
+
+  // a single http request timetout.
+  uint32 http_timeout_ms = 7;
+
+  // throttle window size for channel. if there are more than limited size
+  // messages are flying, `SendAsync` will block until messages are processed or
+  // throw exception after wait for `recv_timeout_ms`
+  uint32 throttle_window_size = 8;
+
+  // BRPC client channel protocol.
+  string brpc_channel_protocol = 9;
+
+  // BRPC client channel connection type.
+  string brpc_channel_connection_type = 10;
+
+  // ssl options for link channel.
+  bool enable_ssl = 11;
+
+  // ssl configs for channel
+  // this config is ignored if enable_ssl == false;
+  SSLOptionsProto client_ssl_opts = 12;
+
+  // ssl configs for service
+  // this config is ignored if enable_ssl == false;
+  SSLOptionsProto server_ssl_opts = 13;
+
+  // chunk parallel send size for channel. if need chunked send when send
+  // message, the max paralleled send size is chunk_parallel_send_size
+  uint32 chunk_parallel_send_size = 17;
+
+  // retry options
+  RetryOptionsProto retry_opts = 14;
+}
+
+// config for unbalanced psi.
+message UbPsiConfig {
+  enum Mode {
+    MODE_UNSPECIFIED = 0;
+
+    // Servers generate cache only. First part of offline stage.
+    MODE_OFFLINE_GEN_CACHE = 1;
+
+    // Servers send cache to clients only. Second part of offline stage.
+    MODE_OFFLINE_TRANSFER_CACHE = 2;
+
+    // Run offline stage.
+    MODE_OFFLINE = 3;
+
+    // Run online stage.
+    MODE_ONLINE = 4;
+
+    // Run all stages.
+    MODE_FULL = 5;
+  }
+
+  // Required.
+  Mode mode = 1;
+
+  // Required for all modes except MODE_OFFLINE_GEN_CACHE.
+  Role role = 2;
+
+  // Config for origin input.
+  // Servers:
+  // Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_FULL.
+  // Clients:
+  // Required for MODE_ONLINE and MODE_FULL.
+  IoConfig input_config = 3;
+
+  // Join keys.
+  // Servers:
+  // Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_FULL.
+  // Clients:
+  // Required for MODE_ONLINE and MODE_FULL.
+  repeated string keys = 4;
+
+  // Servers:
+  // Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_ONLINE and
+  // MODE_FULL.
+  IoConfig server_secret_key_config = 5;
+
+  // Required.
+  IoConfig cache_config = 6;
+
+  bool server_get_result = 7;
+
+  bool client_get_result = 8;
+
+  // It true, output is not promised to be aligned.
+  // Valid if both server_get_result and client_get_result are true.
+  bool disable_alignment = 9;
+
+  // Required for MODE_ONLINE and MODE_FULL.
+  IoConfig output_config = 10;
+
+  // Logging level.
+  DebugOptions debug_options = 11;
+}
+
+// IO configuration.
+message IoConfig {
+  IoType type = 1;
+
+  // Required for FILE.
+  string path = 2;
+}
