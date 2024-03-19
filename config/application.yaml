@@ -2,16 +2,16 @@ server:
   tomcat:
     accesslog:
       enabled: true
-      directory: /var/log/secretpad
+      directory: /var/log/easypsi
   http-port: 8080
   http-port-inner: 9001
   port: 443
   ssl:
     enabled: true
     key-store: "file:./config/server.jks"
-    key-store-password: secretpad
-    key-alias: secretpad-server
-    key-password: secretpad
+    key-store-password: easypsi
+    key-alias: easypsi-server
+    key-password: easypsi
     key-store-type: JKS
 
 spring:
@@ -20,7 +20,7 @@ spring:
       pool:
         size: 10
   application:
-    name: secretpad
+    name: easypsi
   jpa:
     database-platform: org.hibernate.community.dialect.SQLiteDialect
     show-sql: false
@@ -30,7 +30,7 @@ spring:
   datasource:
     hibernate.dialect: org.hibernate.dialect.SQLiteDialect
     driver-class-name: org.sqlite.JDBC
-    url: jdbc:sqlite:./db/secretpad.sqlite
+    url: jdbc:sqlite:./db/easypsi.sqlite
     hikari:
       idle-timeout: 60000
       maximum-pool-size: 1
@@ -54,6 +54,7 @@ logging:
 
 kusciaapi:
   address: root-kuscia-master:8083
+  protocol: ${KUSCIA_PROTOCOL:mtls} # notls tls mtls
   tls:
     cert-file: config/certs/client.crt
     key-file: config/certs/client.pem
@@ -63,10 +64,10 @@ kusciaapi:
 job:
   max-parallelism: 1
 
-secretpad:
+easypsi:
   platform-type: CENTER
   node-id: kuscia-system
-  center-platform-service: secretpad.master.svc
+  center-platform-service: easypsi.master.svc
   gateway: http://localhost:8090
   auth:
     enabled: true
@@ -80,19 +81,12 @@ secretpad:
     host-path: /home/kuscia/p2p/
     dir-path: /app/data/
   version:
-    secretpad: secretpadTag
+    easypsi: easypsiTag
     kuscia: kusciaTag
     secretflow: secretflowTag
 
 tee:
   capsule-mana: capsule-manager.#.svc # tee capsule-manager service
-
-sfclusterDesc:
-  deviceConfig:
-    spu: "{\"runtime_config\":{\"protocol\":\"REF2K\",\"field\":\"FM64\"},\"link_desc\":{\"connect_retry_times\":60,\"connect_retry_interval_ms\":1000,\"brpc_channel_protocol\":\"http\",\"brpc_channel_connection_type\":\"pooled\",\"recv_timeout_ms\":1200000,\"http_timeout_ms\":1200000}}"
-    heu: "{\"mode\": \"PHEU\", \"schema\": \"paillier\", \"key_size\": 2048}"
-  rayFedConfig:
-    crossSiloCommBackend: "brpc_link"
 
 springdoc:
   api-docs:

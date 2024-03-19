@@ -51,9 +51,10 @@ create table if not exists 'user_accounts'
     failed_attempts integer  default null,                       -- failed attempts
     locked_invalid_time datetime default null,                   -- invalid time
     passwd_reset_failed_attempts  integer     default null,      -- passwd reset failed attempts
-    gmt_passwd_reset_release       datetime     default null,    -- passwd reset invalid time
+    gmt_passwd_reset_release       datetime   default null,      -- passwd reset invalid time
     owner_type    varchar(16) default 'CENTER' not null,         -- owner type
-    owner_id      varchar(64) default 'kuscia-system'  not null  -- owner id
+    owner_id      varchar(64) default 'kuscia-system'  not null, -- owner id
+    `initial`     tinyint(1)  default '1' not null               -- initial
 );
 
 create table if not exists 'user_tokens'
@@ -77,14 +78,15 @@ create table if not exists `node`
     node_id         varchar(64)  not null,
     name            varchar(256) not null,
     auth            text,                                           -- ca
-    description     text        default '',                         -- description
+    description     text         default '',                        -- description
     control_node_id varchar(64)  not null,                          -- node control id
     net_address     varchar(100),                                   -- node net address
-    is_deleted      tinyint(1)  default '0' not null,               -- delete flag
-    gmt_create      datetime    default CURRENT_TIMESTAMP not null, -- create time
-    gmt_modified    datetime    default CURRENT_TIMESTAMP not null, -- modified time
-    cert_text       TEXT        default ''  not null,               -- cert text
-    node_remark     varchar(256)                                    -- node remark
+    is_deleted      tinyint(1)   default '0' not null,              -- delete flag
+    gmt_create      datetime     default CURRENT_TIMESTAMP not null,-- create time
+    gmt_modified    datetime     default CURRENT_TIMESTAMP not null,-- modified time
+    cert_text       TEXT         default ''  not null,              -- cert text
+    node_remark     varchar(256),                                   -- node remark
+    trust           tinyint(1)  default '1' not null                -- trust
 );
 create unique index `upk_node_id` on node (`node_id`);
 create index `key_node_name` on node (`name`);
@@ -98,7 +100,7 @@ create table if not exists `node_route`
     dst_net_address varchar(100),                                  -- cooperate node net address
     is_deleted      tinyint(1) default '0' not null,               -- delete flag
     gmt_create      datetime   default CURRENT_TIMESTAMP not null, -- create time
-    gmt_modified    datetime   default CURRENT_TIMESTAMP not null -- modified time
+    gmt_modified    datetime   default CURRENT_TIMESTAMP not null  -- modified time
 );
 create unique index `upk_route_src_dst` on node_route (`src_node_id`, `dst_node_id`);
 create index `key_router_src` on node_route (`src_node_id`);
@@ -160,6 +162,17 @@ create table if not exists 'fabric_log'
     owner  varchar(128) not null,                                -- owner
     result        tinyint(1) default '0' not null,               -- result
     message  varchar(500) not null,                              -- message
+    is_deleted    tinyint(1) default '0' not null,               -- delete flag
+    gmt_create    datetime   default CURRENT_TIMESTAMP not null, -- create time
+    gmt_modified  datetime   default CURRENT_TIMESTAMP not null  -- modified time
+);
+
+create table if not exists 'rsa_encryption_key'
+(
+    id             integer primary key autoincrement,
+    public_key     varchar(1000) not null,                       -- public key
+    private_key    varchar(128) not null,                        -- private key
+    key_invalid_time datetime default null,                      -- invalid time
     is_deleted    tinyint(1) default '0' not null,               -- delete flag
     gmt_create    datetime   default CURRENT_TIMESTAMP not null, -- create time
     gmt_modified  datetime   default CURRENT_TIMESTAMP not null  -- modified time

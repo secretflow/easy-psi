@@ -30,12 +30,12 @@ test: ## Run tests.
 	mvn clean test
 
 .PHONY: build
-build: ## Build SecretPad binary whether to integrate frontend.
+build: ## Build EasyPsi binary whether to integrate frontend.
 	./scripts/build.sh true
 
 .PHONY: image
 image: build ## Build docker image with the manager.
-	./scripts/build_image.sh
+	./scripts/fatimage.sh
 
 .PHONY: docs
 docs: ## Build docs.
