@@ -33,9 +33,9 @@ import os.path
 
 # -- Project information -----------------------------------------------------
 
-project = 'SecretPad'
+project = 'EasyPsi'
 copyright = '2023 Ant Group Co., Ltd.'
-author = 'SecretPad authors'
+author = 'EasyPsi authors'
 
 # -- General configuration ---------------------------------------------------
 
@@ -107,7 +107,7 @@ html_theme_options = {
         },
     ],
     "logo": {
-        "text": "SecretPad",
+        "text": "EasyPsi",
     },
 }
 

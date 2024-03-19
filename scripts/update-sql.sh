@@ -16,10 +16,10 @@
 #
 
 set -ex
-SECRETPAD_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
+EASYPSI_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
 
-DB_PATH="$SECRETPAD_ROOT/db/secretpad.sqlite"
-SCHEMA_PATH="$SECRETPAD_ROOT/config/schema/init.sql"
+DB_PATH="$EASYPSI_ROOT/db/easypsi.sqlite"
+SCHEMA_PATH="$EASYPSI_ROOT/config/schema/init.sql"
 
 rm -rf "$DB_PATH"
 
