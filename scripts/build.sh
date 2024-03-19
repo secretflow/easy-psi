@@ -30,7 +30,7 @@ if [[ $WITH_FRONTEND_FLAG == true ]]; then
   ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
   WORK_DIR="./tmp/frontend"
   mkdir -p $WORK_DIR
-  wget -O $WORK_DIR/frontend.tar https://github.com/secretflow/easypsi-frontend/releases/download/"${FRONTEND_TAG}"/"${FRONTEND_TAG}".tar
+  wget -O $WORK_DIR/frontend.tar https://github.com/secretflow/easy-psi-frontend/releases/download/"${FRONTEND_TAG}"/"${FRONTEND_TAG}".tar
   tar -xvf  $WORK_DIR/frontend.tar -C ${WORK_DIR} --strip-components=1
   DIST_DIR="$WORK_DIR/apps/platform/dist"
   TARGET_DIR="${ROOT}/easypsi-web/src/main/resources/static"
