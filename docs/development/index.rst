@@ -5,4 +5,4 @@
 .. toctree::
     :maxdepth: 2
 
-    build_secretpad_cn
+    build_easypsi_cn

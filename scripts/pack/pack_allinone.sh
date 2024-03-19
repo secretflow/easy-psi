@@ -17,7 +17,7 @@
 
 # load images
 KUSCIA_IMAGE=""
-SECRETPAD_IMAGE=""
+EASYPSI_IMAGE=""
 SECRETFLOW_IMAGE=""
 
 GREEN='\033[0;32m'
@@ -46,8 +46,8 @@ if [ "${KUSCIA_IMAGE}" == "" ]; then
 	KUSCIA_IMAGE=secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/kuscia:latest
 fi
 
-if [ "${SECRETPAD_IMAGE}" == "" ]; then
-	SECRETPAD_IMAGE=secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/secretpad:latest
+if [ "${EASYPSI_IMAGE}" == "" ]; then
+	EASYPSI_IMAGE=secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/easypsi:latest
 fi
 
 if [ "${SECRETFLOW_IMAGE}" == "" ]; then
@@ -55,24 +55,24 @@ if [ "${SECRETFLOW_IMAGE}" == "" ]; then
 fi
 
 echo "kuscia image: $KUSCIA_IMAGE"
-echo "secretpad image: $SECRETPAD_IMAGE"
+echo "easypsi image: $EASYPSI_IMAGE"
 echo "secretflow image: $SECRETFLOW_IMAGE"
 
 set -e
 echo "docker pull ${KUSCIA_IMAGE}"
 docker pull ${KUSCIA_IMAGE}
 log "docker pull ${KUSCIA_IMAGE} done"
-echo "docker pull ${SECRETPAD_IMAGE}"
-docker pull ${SECRETPAD_IMAGE}
-log "docker pull ${SECRETPAD_IMAGE} done"
+echo "docker pull ${EASYPSI_IMAGE}"
+docker pull ${EASYPSI_IMAGE}
+log "docker pull ${EASYPSI_IMAGE} done"
 echo "docker pull ${SECRETFLOW_IMAGE}"
 docker pull ${SECRETFLOW_IMAGE}
 log "docker pull ${SECRETFLOW_IMAGE} done"
 
 kusciaTag=${KUSCIA_IMAGE##*:}
 echo "kuscia tag: $kusciaTag"
-secretpadTag=${SECRETPAD_IMAGE##*:}
-echo "secretpad tag: $secretpadTag"
+easypsiTag=${EASYPSI_IMAGE##*:}
+echo "easypsi tag: $easypsiTag"
 secretflowTag=${SECRETFLOW_IMAGE##*:}
 echo "secretflow tag: $secretflowTag"
 VERSION_TAG="$(git describe --tags)"
@@ -81,8 +81,8 @@ echo "${package_name} tag: $VERSION_TAG"
 echo "docker save -o ./${package_name}/images/kuscia-${kusciaTag}.tar ${KUSCIA_IMAGE} "
 docker save -o ./${package_name}/images/kuscia-${kusciaTag}.tar ${KUSCIA_IMAGE}
 
-echo "docker save -o ./${package_name}/images/secretpad-${secretpadTag}.tar ${SECRETPAD_IMAGE} "
-docker save -o ./${package_name}/images/secretpad-${secretpadTag}.tar ${SECRETPAD_IMAGE}
+echo "docker save -o ./${package_name}/images/easypsi-${easypsiTag}.tar ${EASYPSI_IMAGE} "
+docker save -o ./${package_name}/images/easypsi-${easypsiTag}.tar ${EASYPSI_IMAGE}
 
 echo "docker save -o ./${package_name}/images/secretflow-${secretflowTag}.tar ${SECRETFLOW_IMAGE} "
 docker save -o ./${package_name}/images/secretflow-${secretflowTag}.tar ${SECRETFLOW_IMAGE}

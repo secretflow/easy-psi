@@ -21,11 +21,11 @@ set -o pipefail
 
 PROTOC=protoc
 
-SECRETPAD_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
-echo "${SECRETPAD_ROOT}"
+EASYPSI_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
+echo "${EASYPSI_ROOT}"
 
-SCRIPT_DIR=${SECRETPAD_ROOT}/scripts
-TMP_WORK_DIR=${SECRETPAD_ROOT}/tmp
+SCRIPT_DIR=${EASYPSI_ROOT}/scripts
+TMP_WORK_DIR=${EASYPSI_ROOT}/tmp
 GRPC_JAVA_ROOT=${TMP_WORK_DIR}/grpc-java
 GRPC_JAVA_PLUGIN=${GRPC_JAVA_ROOT}/compiler/build/exe/java_plugin/protoc-gen-grpc-java
 
@@ -69,7 +69,7 @@ function generate_java_code() {
 function generate_kusciaapi_code() {
   PROTO_ROOT_DIR=$1
   PROTO_DIR="$1/kuscia"
-  PROTO_OUTPUT_PATH=${SECRETPAD_ROOT}/secretpad-api/client-java-kusciaapi/src/main/java
+  PROTO_OUTPUT_PATH=${EASYPSI_ROOT}/easypsi-api/client-java-kusciaapi/src/main/java
   pushd "$PROTO_ROOT_DIR" || exit
   generate_java_code "$PROTO_DIR"
   popd
@@ -78,7 +78,7 @@ function generate_kusciaapi_code() {
 function generate_sf_code() {
   PROTO_ROOT_DIR=$1
   PROTO_DIR="$1/secretflow"
-  PROTO_OUTPUT_PATH=${SECRETPAD_ROOT}/secretpad-service/src/main/java
+  PROTO_OUTPUT_PATH=${EASYPSI_ROOT}/easypsi-service/src/main/java
   pushd "$PROTO_ROOT_DIR" || exit
   generate_java_code "$PROTO_DIR"
   popd
@@ -86,8 +86,8 @@ function generate_sf_code() {
 
 function main() {
   prepare
-  generate_kusciaapi_code "${SECRETPAD_ROOT}/proto"
-  generate_sf_code "${SECRETPAD_ROOT}/proto"
+  generate_kusciaapi_code "${EASYPSI_ROOT}/proto"
+  generate_sf_code "${EASYPSI_ROOT}/proto"
 }
 
 main

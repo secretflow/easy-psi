@@ -1,0 +1,67 @@
+# Copyright 2024 Ant Group Co., Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: 2.1
+
+parameters:
+  GHA_Actor:
+    type: string
+    default: ""
+  GHA_Action:
+    type: string
+    default: ""
+  GHA_Event:
+    type: string
+    default: ""
+  GHA_Meta:
+    type: string
+    default: ""
+
+jobs:
+  build-and-push:
+    docker:
+      - image: cimg/openjdk:17.0
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: make image
+      - run:
+          name: Push to Docker Hub
+          command: |
+            # login easypsi dockerhub registry
+            docker login -u ${DOCKER_DEPLOY_USERNAME} -p ${DOCKER_DEPLOY_TOKEN}
+            # login easypsi aliyun registry
+            docker login -u ${ALIYUN_DOCKER_USERNAME} -p ${ALIYUN_DOCKER_PASSWORD}  secretflow-registry.cn-hangzhou.cr.aliyuncs.com
+            CIRCLETAG=$(echo ${CIRCLE_TAG} | sed 's/v//')
+
+            docker tag $(docker images --format "{{.Repository}}:{{.Tag}}" | sed -n '1p') secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/easy-psi:latest
+            docker tag $(docker images --format "{{.Repository}}:{{.Tag}}" | sed -n '1p') secretflow/easy-psi:latest
+            docker tag $(docker images --format "{{.Repository}}:{{.Tag}}" | sed -n '1p') secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/easy-psi:${CIRCLETAG}
+            docker tag $(docker images --format "{{.Repository}}:{{.Tag}}" | sed -n '1p') secretflow/easy-psi:${CIRCLETAG}
+            docker push secretflow/easy-psi:${CIRCLETAG}
+            docker push secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/easy-psi:${CIRCLETAG}
+            docker push secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/easy-psi:latest
+            docker push secretflow/easy-psi:latest
+
+workflows:
+  build-deploy:
+    jobs:
+      - build-and-push:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

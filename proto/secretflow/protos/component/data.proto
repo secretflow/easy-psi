@@ -17,7 +17,6 @@ syntax = "proto3";
 package secretflow.component;
 
 import "google/protobuf/any.proto";
-import "secretflow/protos/component/cluster.proto";
 
 option java_package = "org.secretflow.proto.component";
 
@@ -28,8 +27,6 @@ message SystemInfo {
   // Supported: Secretflow
   string app_name = 1;
 
-  // Only valid when app_name is Secretflow.
-  SFClusterDesc secretflow = 2;
 
   // SCQL, GRM related meta information should be here.
   // You can add more field here, when a new type of application is added.

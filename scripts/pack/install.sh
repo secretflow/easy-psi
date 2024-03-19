@@ -18,7 +18,7 @@
 # load images
 
 KUSCIA_IMAGE=""
-SECRETPAD_IMAGE=""
+EASYPSI_IMAGE=""
 SECRETFLOW_IMAGE=""
 
 P2P_DEFAULT_DIR="$HOME/kuscia/p2p"
@@ -29,11 +29,10 @@ usage() {
 
 p2p OPTIONS:
     -n              [mandatory] Domain id to be deployed.
-    -i              [optional]  The IP address exposed by the domain. Usually the host IP, default is the IP address of interface eth0.
     -c              [optional]  The host directory used to store domain certificates, default is 'kuscia-{{DEPLOY_MODE}}-{{DOMAIN_ID}}-certs'. It will be mounted into the domain container.
     -h              [optional]  Show this help text.
     -p              [optional]  The port exposed by kuscia-lite-gateway, The port must NOT be occupied by other processes, default 8080
-    -s              [optional]  The port exposed by secretpad-edge, The port must NOT be occupied by other processes, default 8088
+    -s              [optional]  The port exposed by easypsi-edge, The port must NOT be occupied by other processes, default 8088
     -k              [optional]  The port exposed by kuscia-lite-api-http, The port must NOT be occupied by other processes, default 8081
     -g              [optional]  The port exposed by kuscia-lite-api-grpc, The port must NOT be occupied by other processes, default 8082
     -m              [optional]  The kuscia endpoint.
@@ -45,28 +44,25 @@ example:
 }
 
 domain_id=
-domain_host_ip=
 domain_host_port=
 domain_api_http_port=
 domain_api_grpc_port=
-secretpad_edge_port=
+easypsi_edge_port=
 domain_certs_dir=
 master_endpoint=
 token=
 masterca=
 volume_path=$(pwd)
 install_dir=
+kuscia_protocol="mtls"
 
-while getopts 'c:d:i:n:p:s:t:m:k:g:h' option; do
+while getopts 'c:d:i:n:p:s:t:m:k:g:h:' option; do
   case "$option" in
   c)
     domain_certs_dir=$OPTARG
     ;;
   d)
     install_dir=$OPTARG
-    ;;
-  i)
-    domain_host_ip=$OPTARG
     ;;
   n)
     domain_id=$OPTARG
@@ -75,7 +71,7 @@ while getopts 'c:d:i:n:p:s:t:m:k:g:h' option; do
     domain_host_port=$OPTARG
     ;;
   s)
-    secretpad_edge_port=$OPTARG
+    easypsi_edge_port=$OPTARG
     ;;
   k)
     domain_api_http_port=$OPTARG
@@ -118,8 +114,8 @@ for file in images/*; do
 		someimage=$(echo ${imageInfo} | sed "s/Loaded image: //")
 		if [[ $someimage == *kuscia* ]]; then
 			KUSCIA_IMAGE=$someimage
-		elif [[ $someimage == *secretpad* ]]; then
-			SECRETPAD_IMAGE=$someimage
+		elif [[ $someimage == *easypsi* ]]; then
+			EASYPSI_IMAGE=$someimage
 #		elif [[ $someimage == *secretflow-lite* ]]; then
 #			SECRETFLOW_IMAGE=$someimage
 #		elif [[ $someimage == *sf-dev-anolis8* ]]; then
@@ -130,7 +126,7 @@ for file in images/*; do
 	fi
 done
 export KUSCIA_IMAGE=$KUSCIA_IMAGE
-export SECRETPAD_IMAGE=$SECRETPAD_IMAGE
+export EASYPSI_IMAGE=$EASYPSI_IMAGE
 export SECRETFLOW_IMAGE=$SECRETFLOW_IMAGE
 
 # deploy p2p
@@ -139,12 +135,8 @@ if [[ ${domain_id} == "" ]]; then
   exit 1
 fi
 
-if [[ ${domain_host_ip} == "" ]]; then
-  domain_host_ip="127.0.0.1"
-fi
-
-if [[ ${secretpad_edge_port} == "" ]]; then
-  secretpad_edge_port="8088"
+if [[ ${easypsi_edge_port} == "" ]]; then
+  easypsi_edge_port="8088"
 fi
 
 if [[ ${domain_host_port} == "" ]]; then
@@ -166,16 +158,20 @@ fi
 # set intall dir of the deploy.sh
 # the datapath is ${ROOT}/kuscia-${deploy_mode}-${DOMAIN_ID}-data
 # the certpath is ${ROOT}/kuscia-${deploy_mode}-${DOMAIN_ID}-certs
+# the kuscia-configpath is ${ROOT}
 export ROOT=${install_dir}
 
-cmd_opt="-n ${domain_id} -i ${domain_host_ip} -p ${domain_host_port} -k ${domain_api_http_port} -g ${domain_api_grpc_port} \
--d ${install_dir}/kuscia-autonomy-${domain_id}-data -l ${install_dir}/kuscia-autonomy-${domain_id}-log"
+mkdir -p ${ROOT}
+kuscia_config=${ROOT}/kuscia.yaml
+# generate kuscia configuration file
+docker run --rm $KUSCIA_IMAGE bin/kuscia init --mode autonomy --domain $domain_id  --protocol $kuscia_protocol > $kuscia_config
+
+cmd_opt="-n ${domain_id} -p ${domain_host_port} -k ${domain_api_http_port} -g ${domain_api_grpc_port} \
+-d ${install_dir}/kuscia-autonomy-${domain_id}-data -l ${install_dir}/kuscia-autonomy-${domain_id}-log \
+-c ${kuscia_config}"
 if [[ ${domain_certs_dir} != "" ]]; then
-  cmd_opt="${cmd_opt} -c ${domain_certs_dir}"
+    domain_certs_dir=${ROOT}/kuscia-autonomy-${domain_id}-certs
 fi
-
-
-
 
 # copy deploy.sh from kuscia image
 docker run --rm $KUSCIA_IMAGE cat /home/kuscia/scripts/deploy/deploy.sh > deploy.sh && chmod u+x deploy.sh
@@ -185,14 +181,15 @@ echo "bash $(pwd)/deploy.sh autonomy ${cmd_opt}"
 bash $(pwd)/deploy.sh autonomy ${cmd_opt}
 
 # add external name svc
-docker exec -it  ${USER}-kuscia-autonomy-${domain_id} scripts/deploy/create_secretpad_svc.sh ${USER}-kuscia-secretpad-p2p-${domain_id} ${domain_id}
+docker exec -it  ${USER}-kuscia-autonomy-${domain_id} scripts/deploy/create_secretpad_svc.sh ${USER}-kuscia-easypsi-p2p-${domain_id} ${domain_id}
 
 # initialize start_p2p.sh
 #edge_opt="-n ${node_id} -s 8088 -m root-kuscia-autonomy-alice:8083"
 KUSCIA_NAME="${USER}-kuscia-autonomy-${domain_id}"
-edge_opt="-n ${domain_id} -s ${secretpad_edge_port} -m ${KUSCIA_NAME}:8083 "
+edge_opt="-n ${domain_id} -s ${easypsi_edge_port} -m ${KUSCIA_NAME}:8083 -t ${kuscia_protocol}"
 
+export EASYPSI_PORT=${easypsi_edge_port}
 # initialize start_p2p.sh
-docker run --rm --entrypoint /bin/bash -v $(pwd):/tmp/secretpad $SECRETPAD_IMAGE -c 'cp -R /app/scripts/start_p2p.sh /tmp/secretpad/'
+docker run --rm --entrypoint /bin/bash -v $(pwd):/tmp/easypsi $EASYPSI_IMAGE -c 'cp -R /app/scripts/start_p2p.sh /tmp/easypsi/'
 echo "bash $(pwd)/start_p2p.sh ${edge_opt}"
 bash $(pwd)/start_p2p.sh ${edge_opt}
