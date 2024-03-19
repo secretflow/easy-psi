@@ -30,7 +30,7 @@ test: ## Run tests.
 	mvn clean test
 
 .PHONY: build
-build: ## Build SecretPad binary whether to integrate frontend.
+build: ## Build EasyPsi binary whether to integrate frontend.
 	./scripts/build.sh true
 
 .PHONY: image

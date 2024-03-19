@@ -16,7 +16,7 @@
 #
 
 # global configuration
-DB_PATH="/app/db/secretpad.sqlite"
+DB_PATH="/app/db/easypsi.sqlite"
 LOG_FILE_PATH_DEFAULT="/app/log/init.log"
 USER_NAME=""
 USER_PASSWD=""

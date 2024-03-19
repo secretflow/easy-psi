@@ -24,6 +24,6 @@ git fetch --tags
 VERSION_TAG="$(git describe --tags)"
 commit_id=$(git log -n 1  --pretty=oneline | awk '{print $1}' | cut -b 1-6)
 tag=${VERSION_TAG}-${DATETIME}-"${commit_id}"
-local_image=secretpad:$tag
+local_image=easypsi:$tag
 echo "$commit_id"
 docker build -f ./build/Dockerfiles/anolis.Dockerfile --platform linux/amd64 -t "$local_image" .

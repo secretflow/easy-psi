@@ -20,12 +20,13 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
-        <module>secretpad-manager</module>
-        <module>secretpad-web</module>
-        <module>secretpad-common</module>
-        <module>secretpad-persistence</module>
-        <module>secretpad-api</module>
-        <module>secretpad-service</module>
+        <module>easypsi-manager</module>
+        <module>easypsi-web</module>
+        <module>easypsi-common</module>
+        <module>easypsi-persistence</module>
+        <module>easypsi-api</module>
+        <module>easypsi-service</module>
+        <module>easypsi-test</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -33,13 +34,13 @@
         <version>3.1.7</version>
     </parent>
     <groupId>org.secretflow</groupId>
-    <artifactId>secretpad-parent</artifactId>
+    <artifactId>easypsi-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>secretpad-parent</name>
-    <description>secretpad parent</description>
+    <name>easypsi-parent</name>
+    <description>easypsi parent</description>
     <properties>
         <java.version>17</java.version>
-        <spring-framework.version>6.0.16</spring-framework.version>
+        <spring-framework.version>6.0.17</spring-framework.version>
         <springframework.boot.version>3.1.7</springframework.boot.version>
         <spring-security-config.version>6.1.2</spring-security-config.version>
         <maven.compiler.source>17</maven.compiler.source>
@@ -57,7 +58,7 @@
         <jakarta.version>2.1.1</jakarta.version>
         <javax.version>1.3.2</javax.version>
         <guava.version>32.1.1-jre</guava.version>
-        <commons-compress.version>1.21</commons-compress.version>
+        <commons-compress.version>1.26.0</commons-compress.version>
         <springdoc-openapi-ui.version>2.1.0</springdoc-openapi-ui.version>
         <plugin.os.version>1.7.1</plugin.os.version>
         <plugin.protobuf.version>0.6.1</plugin.protobuf.version>
@@ -66,28 +67,31 @@
         <com.squareup.okio.version>3.4.0</com.squareup.okio.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <logback.version>1.4.14</logback.version>
+        <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
+        <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
+        <jacoco.path>${project.build.directory}/jacoco-ut.exec</jacoco.path>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.secretflow</groupId>
-                <artifactId>secretpad-common</artifactId>
+                <artifactId>easypsi-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.secretflow</groupId>
-                <artifactId>secretpad-persistence</artifactId>
+                <artifactId>easypsi-persistence</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.secretflow</groupId>
-                <artifactId>secretpad-manager</artifactId>
+                <artifactId>easypsi-manager</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.secretflow</groupId>
-                <artifactId>secretpad-service</artifactId>
+                <artifactId>easypsi-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -97,7 +101,7 @@
             </dependency>
             <dependency>
                 <groupId>org.secretflow</groupId>
-                <artifactId>client-java-secretpad</artifactId>
+                <artifactId>client-java-easypsi</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -265,8 +269,34 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+            </plugin>
+
+        </plugins>
     </build>
 
 </project>

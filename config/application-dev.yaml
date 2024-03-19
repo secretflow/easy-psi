@@ -2,15 +2,15 @@ server:
   tomcat:
     accesslog:
       enabled: true
-      directory: /var/log/secretpad
+      directory: /var/log/easypsi
   http-port: 8080
   port: 443
   ssl:
     enabled: true
     key-store: "file:./config/server.jks"
-    key-store-password: secretpad
-    key-alias: secretpad-server
-    key-password: secretpad
+    key-store-password: easypsi
+    key-alias: easypsi-server
+    key-password: easypsi
     key-store-type: JKS
 
 spring:
@@ -19,7 +19,7 @@ spring:
       pool:
         size: 10
   application:
-    name: secretpad
+    name: easypsi
   jpa:
     database-platform: org.hibernate.community.dialect.SQLiteDialect
     show-sql: true
@@ -29,7 +29,7 @@ spring:
   datasource:
     hibernate.dialect: org.hibernate.dialect.SQLiteDialect
     driver-class-name: org.sqlite.JDBC
-    url: jdbc:sqlite:./db/secretpad.sqlite
+    url: jdbc:sqlite:./db/easypsi.sqlite
     hikari:
       idle-timeout: 60000
       maximum-pool-size: 1
@@ -84,7 +84,7 @@ fabric:
   keystore-path: config/fabric/keystore.pem
   tls-cert-path: config/fabric/tls.pem
 
-secretpad:
+easypsi:
   auth:
     enabled: false
   response:
@@ -95,17 +95,6 @@ secretpad:
     max-request-size: -1 # -1 means not limit, e.g.  200MB, 1GB
   data:
     dir-path: ../tmp/data/
-
-tee:
-  capsule-mana: capsule-manager.#.svc # tee capsule-manager service
-
-sfclusterDesc:
-  deviceConfig:
-    spu: "{\"runtime_config\":{\"protocol\":\"REF2K\",\"field\":\"FM64\"},\"link_desc\":{\"connect_retry_times\":60,\"connect_retry_interval_ms\":1000,\"brpc_channel_protocol\":\"http\",\"brpc_channel_connection_type\":\"pooled\",\"recv_timeout_ms\":1200000,\"http_timeout_ms\":1200000}}"
-    heu: "{\"mode\": \"PHEU\", \"schema\": \"paillier\", \"key_size\": 2048}"
-  rayFedConfig:
-    crossSiloCommBackend: "brpc_link"
-
 
 springdoc:
   api-docs:

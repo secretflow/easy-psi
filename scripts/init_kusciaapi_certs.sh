@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-SECRETPAD_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
+EASYPSI_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
 
-echo "root path is: $SECRETPAD_ROOT"
-CERT_DIR="$SECRETPAD_ROOT/config/certs"
+echo "root path is: $EASYPSI_ROOT"
+CERT_DIR="$EASYPSI_ROOT/config/certs"
 
 echo "cert path is: $CERT_DIR"
 

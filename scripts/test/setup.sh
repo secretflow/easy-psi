@@ -17,12 +17,12 @@
 
 set -ex
 
-SECRETPAD_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
+EASYPSI_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
 
-echo "root path is: $SECRETPAD_ROOT"
+echo "root path is: $EASYPSI_ROOT"
 
 function init_kusciaapi_certs() {
-  CERT_DIR="$SECRETPAD_ROOT/config/certs"
+  CERT_DIR="$EASYPSI_ROOT/config/certs"
   echo "cert path is: $CERT_DIR"
   mkdir -p "$CERT_DIR"
   pushd "$CERT_DIR" || exit
@@ -65,9 +65,9 @@ init_kusciaapi_certs
 echo "generate kusciaapi certs successfully"
 
 echo "start to init sqlite"
-mkdir -p "${SECRETPAD_ROOT}/db"
-SQL_PATH="${SECRETPAD_ROOT}/config/schema/init.sql"
-DB_PATH="${SECRETPAD_ROOT}/db/secretpad.sqlite"
+mkdir -p "${EASYPSI_ROOT}/db"
+SQL_PATH="${EASYPSI_ROOT}/config/schema/init.sql"
+DB_PATH="${EASYPSI_ROOT}/db/easypsi.sqlite"
 if [ -e "${DB_PATH}" ]; then
   echo >"${DB_PATH}"
   sqlite3 "${DB_PATH}" ".read ${SQL_PATH}"
