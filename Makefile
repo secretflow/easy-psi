@@ -35,7 +35,7 @@ build: ## Build EasyPsi binary whether to integrate frontend.
 
 .PHONY: image
 image: build ## Build docker image with the manager.
-	./scripts/fatimage.sh
+	./scripts/build_fatimage.sh
 
 .PHONY: docs
 docs: ## Build docs.
