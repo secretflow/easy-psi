@@ -29,11 +29,11 @@ target/
 !**/src/main/**/build/
 !**/src/test/**/build/
 !**/src/test/resources/certs/
-secretpad-api/client-java-kusciaapi/**/kusciaapi/
-secretpad-api/client-java-kusciaapi/**/common/
-secretpad-service/**/org/secretflow/proto/
-secretpad-service/**/com/opensecretflow/spec/v1/
-secretpad-web/config
+easypsi-api/client-java-kusciaapi/**/kusciaapi/
+easypsi-api/client-java-kusciaapi/**/common/
+easypsi-service/**/org/secretflow/proto/
+easypsi-service/**/com/opensecretflow/spec/v1/
+easypsi-web/config
 
 ### VS Code ###
 .vscode/
@@ -48,3 +48,7 @@ build/**/settings.xml
 docs/_build
 
 .java-version
+/easypsi-test/surefire-report/
+/easypsi-test/jacoco.xml
+/surefire-report/
+/easypsi-test/TEST-all.xml

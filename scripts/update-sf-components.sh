@@ -25,7 +25,7 @@ usage="$(basename "$0") [OPTIONS]
 OPTIONS:
     -h    [optional] show this help text
     -i    [mandatory] secretflow docker image info
-    -u    [optional] the user name of deploying the secretpad and kuscia container, default value: ${USER}
+    -u    [optional] the user name of deploying the easypsi and kuscia container, default value: ${USER}
 
 example:
  ./update-sf-components.sh -u ${USER} -i secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/secretflow-lite-anolis8:latest
@@ -56,7 +56,7 @@ if [[ $SF_IMAGE = "" ]]; then
   exit 1
 fi
 
-SECRETPAD_CONTAINER_NAME="${DEPLOY_USER}-kuscia-secretpad"
+EASYPSI_CONTAINER_NAME="${DEPLOY_USER}-kuscia-easypsi"
 SF_COMP_TEMP_DIR="/tmp/sf-cpts"
 COMP_LIST=""
 COMP_LIST_FILE="sf_comp_list.json"
@@ -93,21 +93,21 @@ function post_action() {
 }
 
 function update_sf_components() {
-  echo "=> update secretflow components of the ${SECRETPAD_CONTAINER_NAME} container"
+  echo "=> update secretflow components of the ${EASYPSI_CONTAINER_NAME} container"
 
   parse_sf_image_labels
 
   echo "=> => replace secretflow components config file"
-  docker cp "${SF_COMP_TEMP_DIR}/${COMP_LIST_FILE}" "${SECRETPAD_CONTAINER_NAME}:/app/config/components/secretflow.json" || exit 1
-  docker cp "${SF_COMP_TEMP_DIR}/${COMP_TRANSLATION_FILE}" "${SECRETPAD_CONTAINER_NAME}:/app/config/i18n/secretflow.json" || exit 1
+  docker cp "${SF_COMP_TEMP_DIR}/${COMP_LIST_FILE}" "${EASYPSI_CONTAINER_NAME}:/app/config/components/secretflow.json" || exit 1
+  docker cp "${SF_COMP_TEMP_DIR}/${COMP_TRANSLATION_FILE}" "${EASYPSI_CONTAINER_NAME}:/app/config/i18n/secretflow.json" || exit 1
   echo "=> => finish replacing secretflow components config file"
 
 
-  echo "=> => restart container: ${SECRETPAD_CONTAINER_NAME}"
-  docker restart "${SECRETPAD_CONTAINER_NAME}" > /dev/null
+  echo "=> => restart container: ${EASYPSI_CONTAINER_NAME}"
+  docker restart "${EASYPSI_CONTAINER_NAME}" > /dev/null
 
   post_action
-  echo "=> finish updating secretflow components of the ${SECRETPAD_CONTAINER_NAME} container"
+  echo "=> finish updating secretflow components of the ${EASYPSI_CONTAINER_NAME} container"
 }
 
 
