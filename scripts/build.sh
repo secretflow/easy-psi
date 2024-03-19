@@ -32,7 +32,7 @@ if [[ $WITH_FRONTEND_FLAG == true ]]; then
   mkdir -p $WORK_DIR
   wget -O $WORK_DIR/frontend.tar https://github.com/secretflow/easy-psi-frontend/releases/download/"${FRONTEND_TAG}"/"${FRONTEND_TAG}".tar
   tar -xvf  $WORK_DIR/frontend.tar -C ${WORK_DIR} --strip-components=1
-  DIST_DIR="$WORK_DIR/apps/platform/dist"
+  DIST_DIR="$WORK_DIR/dist"
   TARGET_DIR="${ROOT}/easypsi-web/src/main/resources/static"
   mkdir -p "${TARGET_DIR}"
   cp -rpf $DIST_DIR/* "${TARGET_DIR}"
