@@ -45,7 +45,7 @@ git fetch --tags
 VERSION_TAG="$(git describe --tags)"
 commit_id=$(git log -n 1  --pretty=oneline | awk '{print $1}' | cut -b 1-6)
 echo "$commit_id"
-tag=${VERSION_TAG}-${DATETIME}-"${commit_id}"
+tag=${VERSION_TAG}
 local_image=easypsi:$tag
 echo "local_image: ${local_image}"
 
