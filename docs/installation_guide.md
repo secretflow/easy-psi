@@ -1,6 +1,6 @@
 # Easy PSI 安装指引
 
-欢迎使用隐语 Easy PSI。<br />不想安装？请参阅 [https://www.yuque.com/secret-flow/admin/wl2hba8vbkgpea4i](https://www.secretflow.org.cn/zh-CN/docs/easy-psi/latest/wl2hba8vbkgpea4i)
+欢迎使用隐语 Easy PSI。<br />不想安装？请参阅 [https://www.yuque.com/secret-flow/admin/wl2hba8vbkgpea4i](https://www.yuque.com/secret-flow/admin/wl2hba8vbkgpea4i)
 # 安装包下载
 ![installer](imgs/installer.png) <br />[点击跳转到下载页面](https://www.secretflow.org.cn/deployment)
 # 一、安装指南
